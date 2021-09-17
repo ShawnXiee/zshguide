@@ -8,23 +8,23 @@
 和其他变量类型不同，哈希表是需要提前声明的，因为哈希表的赋值语法和数组一样，如果不声明，是无法区分的。
 
 ```
-% typeset -A hashmap
+% typeset -A table
 # 或者用 local，二者功能是一样的
-% local -A hashmap
+% local -A table
 
 # 赋值的语法和数组一样，但顺序依次是键、值、键、值
-% hashmap=(k1 v1 k2 v2)
+% table=(k1 v1 k2 v2)
 
 # 直接用 echo 只能输出值
-% echo $hashmap
+% echo $table
 v1 v2
 
 # 使用 (kv) 同时输出键和值，(kv) 会把键和值都放到同一个数组里
-% echo ${(kv)hashmap}
+% echo ${(kv)table}
 k1 v1 k2 v2
  
 # 哈希表的大小是键值对的数量
-% echo $#hashmap
+% echo $#table
 2
 ```
 
@@ -34,15 +34,15 @@ k1 v1 k2 v2
 
 ```
 # 可以声明和赋值写到一行
-% local -A hashmap=(k1 v1 k2 v2 k3 v3)
-% echo $hashmap[k2]
+% local -A table=(k1 v1 k2 v2 k3 v3)
+% echo $table[k2]
 v2
 
-% hashmap[k2]="V2"
+% table[k2]="V2"
 
 # 删除元素的方法和数组不同，引号不能省略
-% unset "hashmap[k1]"
-% echo ${(kv)hashmap}
+% unset "table[k1]"
+% echo ${(kv)table}
 k2 V2 k3 v3
 ```
 
@@ -50,19 +50,19 @@ k2 V2 k3 v3
 
 ```
 # 追加元素的方法和数组一样
-% hashmap+=(k4 v4 k5 v5)
-% echo $hashmap
+% table+=(k4 v4 k5 v5)
+% echo $table
 V2 v3 v4 v5
 
 
-% local -A hashmap1 hashmap2
-% hashmap1=(k1 v1 k2 v2)
-% hashmap2=(k2 v222 k3 v3)
+% local -A table1 table2
+% table1=(k1 v1 k2 v2)
+% table2=(k2 v222 k3 v3)
 
 # 拼接哈希表，要展开成数组再追加
-% hashmap1+=(${(kv)hashmap2})
+% table1+=(${(kv)table2})
 # 如果键重复，会直接替换值，哈希表的键是不重复的
-% echo ${(kv)hashmap1}
+% echo ${(kv)table1}
 k1 v1 k2 v222 k3 v3
 ```
 
@@ -71,10 +71,10 @@ k1 v1 k2 v222 k3 v3
 用 `(kv)` `(k)` 等先将哈希表转化成数组，然后再遍历。
 
 ```
-% local -A hashmap=(k1 v1 k2 v2 k3 v3)
+% local -A table=(k1 v1 k2 v2 k3 v3)
 
 # 只遍历值
-% for i ($hashmap) {
+% for i ($table) {
 > echo $i
 > }
 v1
@@ -82,7 +82,7 @@ v2
 v3
 
 # 只遍历键
-% for i (${(k)hashmap}) {
+% for i (${(k)table}) {
 > echo $i
 > }
 k1
@@ -90,7 +90,7 @@ k2
 k3
 
 # 同时遍历键和值
-% for k v (${(kv)hashmap}) {
+% for k v (${(kv)table}) {
 > echo "$k -> $v"
 > }
 k1 -> v1
@@ -103,18 +103,18 @@ k3 -> v3
 判断键是否存在。
 
 ```
-% local -A hashmap=(k1 v1 k2 v2 k3 v3)
-% (($+hashmap[k1])) && echo good
+% local -A table=(k1 v1 k2 v2 k3 v3)
+% (($+table[k1])) && echo good
 good
-% (($+hashmap[k4])) && echo good
+% (($+table[k4])) && echo good
 ```
 
 如果需要判断某个值是否存在，直接对值的数组判断即可。但这样做就体现不出哈希表的优势了。
 
 ```
-% local -A hashmap=(k1 v1 k2 v2 k3 v3)
+% local -A table=(k1 v1 k2 v2 k3 v3)
 # value 是值的数组，也可以用 local -a 强行声明为数组
-% value=($hashmap)
+% value=($table)
 
 % (( $value[(I)v1] )) && echo good
 good
@@ -126,18 +126,18 @@ good
 对哈希表元素排序的方法，和数组类似，多了 `k` `v` 两个选项，其余的选项如 `o`（升序）、`O`（降序）、`n`（按数字大小）、`i`（忽略大小写）等通用，不再一一举例。
 
 ```
-% local -A hashmap=(aa 33 cc 11 bb 22)
+% local -A table=(aa 33 cc 11 bb 22)
 
 # 只对值排序
-% echo ${(o)hashmap}
+% echo ${(o)table}
 11 22 33
 
 # 只对键排序
-% echo ${(ok)hashmap}
+% echo ${(ok)table}
 aa bb cc
 
 # 键值放在一起排序
-% echo ${(okv)hashmap}
+% echo ${(okv)table}
 11 22 33 aa bb cc
 ```
 
@@ -147,8 +147,8 @@ aa bb cc
 
 ```
 % str="k1 v1 k2 v2 k3 v3"
-% local -A hashmap=(${=str})
-% echo $hashmap
+% local -A table=(${=str})
+% echo $table
 v1 v2 v3
 ```
 
@@ -157,30 +157,75 @@ v1 v2 v3
 对哈希表中的每个元素统一处理，和对数组的操作是类似的，多了 `k` `v` 两个选项用于指定是对键处理还是对值处理，可以一起处理。不再一一举例。
 
 ```
-% local -A hashmap=(k1 v1 k2 v2 k3 v3)
-% print ${(U)hashmap}
+% local -A table=(k1 v1 k2 v2 k3 v3)
+% print ${(U)table}
 V1 V2 V3
 
-% print ${(Uk)hashmap}
+% print ${(Uk)table}
 K1 K2 K3
 
-% print ${(Ukv)hashmap}
+% print ${(Ukv)table}
 K1 V1 K2 V2 K3 V3
 ```
 
 `:#` 也可以在哈希表上用。
 
 ```
-% local -A hashmap=(k1 v1 k2 v2 k3 v3)
+% local -A table=(k1 v1 k2 v2 k3 v3)
 
 # 排除匹配到的值
-% echo ${hashmap:#v1}
+% echo ${table:#v1}
 v2 v3
 
 # 只输出匹配到的键
-% echo ${(Mk)hashmap:#k[1-2]}
+% echo ${(Mk)table:#k[1-2]}
 k1 k2
 ```
+
+### 多维哈希表
+
+Zsh 并不支持多维哈希表以及多维数组，但可以通过一些方法来模拟，以实现一部分功能。
+
+#### 用一维哈希表模拟多维哈希表
+
+```
+% local -A table
+# 这里用 , 作为分隔符，也可以用其他符号。
+% table[1,1]=a
+% table[1,2]=b
+% table[k,v]=c
+% echo $table[1,1] $table[1,2] $table[k,v]
+a b c
+```
+
+好处：使用方便，而且支持的维数不受限制。
+
+坏处：功能太单一，比如不能对 `table[1]` 进行处理。
+
+#### 用字符串分割访问来模拟多维哈希表
+
+```
+% local -A table
+# 分隔符为空格
+% table[1]='a b'
+% table[2]='c d'
+% print -l $table[1] ${table[1][(w)2]} ${table[2][(w)1]}
+a b
+b
+c
+
+# 分隔符不是空格
+% table[a]='aa,bb'
+% table[b]='cc,dd'
+% print -l $table[a] ${table[a][(ws:,:)2]} ${table[b][(ws:,:)1]}
+aa,bb
+bb
+cc
+```
+
+好处：可以对 `table[1]` 进行处理。
+
+坏处：不大方便，性能也不好。而且功能同样受限，比如第一维只能是数组，不能是哈希表。可以支持更多维，但需要再增加新的分隔符，使用起来更麻烦。
 
 ### 总结
 

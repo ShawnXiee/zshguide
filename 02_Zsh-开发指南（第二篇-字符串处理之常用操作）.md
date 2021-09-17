@@ -277,6 +277,21 @@ x
 /a/b/c
 ```
 
+### 相对路径转绝对路径
+
+```
+# ${filepath:A} 功能相当于 $(readlink -f $filepath)
+% pwd
+/tmp/test
+% ls -lF
+-rw-r--r-- 1 goreliu goreliu  0 Feb 15 13:14 a.txt
+lrwxrwxrwx 1 goreliu goreliu 11 Feb 15 13:16 b -> /usr/bin/ls*
+% filepath1=a.txt
+% filepath2=b
+% echo ${filepath1:A} ${filepath2:A}
+/tmp/test/a.txt /usr/bin/ls
+```
+
 ### 字符串分隔
 
 ```
@@ -292,6 +307,25 @@ cc
 # 如果分隔符是 : 就用别的字符作为左右界，比如 ws.:.
 % echo ${str[(ws:--:)3]}
 cc
+```
+
+```
+# 或者先转换成数组
+% str="1:2::4"
+% str_array=(${(s/:/)str})
+% echo $str_array
+1 2 4
+% echo $str_array[2]
+2
+% echo $str_array[3]
+4
+
+# 保留其中的空字符串
+% str_array=("${(@s/:/)str}")
+% echo $str_array[3]
+
+% echo $str_array[4]
+4
 ```
 
 ### 多行字符串

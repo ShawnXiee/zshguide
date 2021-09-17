@@ -43,6 +43,10 @@ Abc
 % echo ${${a:u}:l}
 abc
 
+# 可以简化成
+% echo ${a:u:l}
+abc
+
 # 可以两种风格嵌套在一起
 % echo ${(C)${a:u}}
 Abc
@@ -100,6 +104,7 @@ zsh: var: error
 % var=abc
 # 如果 var 有值，输出 123
 % echo ${var:+123}
+123
 % echo ${varr:+123}
 
 ```
@@ -147,9 +152,9 @@ d
 % float f=1.2
 % str=abc
 % array=(a b c)
-% local -A hashmap=(k1 v1 k2 v2)
+% local -A table=(k1 v1 k2 v2)
 
-% echo ${(t)i} ${(t)f} ${(t)str} ${(t)array} ${(t)hashmap}
+% echo ${(t)i} ${(t)f} ${(t)str} ${(t)array} ${(t)table}
 integer float scalar array association
 ```
 
@@ -169,8 +174,8 @@ cc
 % echo ${${array[2]}[2]}
 b
 
-% local -A hashmap=(k1 v1 k2 v2 k3 v3)
-% echo ${${hashmap[k1]}[2]}
+% local -A table=(k1 v1 k2 v2 k3 v3)
+% echo ${${table[k1]}[2]}
 1
 ```
 
